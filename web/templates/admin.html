@@ -1,0 +1,74 @@
+{{ define "page-products" }}
+{{ template "admin-top" . }}
+<div class="page-head row">
+  <h1>Produk</h1>
+  <a class="btn" href="/admin/products/new">Tambah produk</a>
+</div>
+{{ if .Products }}
+<div class="table-wrap">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Nama</th>
+        {{ if .IsAdmin }}<th>Toko</th>{{ end }}
+        <th>Harga</th>
+        <th>Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {{ range .Products }}
+      <tr>
+        <td>{{ .Name }}</td>
+        {{ if $.IsAdmin }}<td>{{ .Seller.StoreName }}</td>{{ end }}
+        <td>{{ formatIDR .Price }}</td>
+        <td><span class="pill" data-status="{{ .Status }}">{{ if eq .Status "published" }}Tayang{{ else }}Draf{{ end }}</span></td>
+        <td><a href="/admin/products/{{ .ID }}/edit">Ubah</a></td>
+      </tr>
+      {{ end }}
+    </tbody>
+  </table>
+</div>
+{{ else }}
+<p class="empty">Belum ada produk.</p>
+{{ end }}
+{{ template "admin-bottom" . }}
+{{ end }}
+
+{{ define "page-orders" }}
+{{ template "admin-top" . }}
+<h1>Pesanan</h1>
+{{ if .Orders }}
+<div class="table-wrap">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Invoice</th>
+        <th>Produk</th>
+        <th>Pembeli</th>
+        {{ if .IsAdmin }}<th>Toko</th>{{ end }}
+        <th>Total</th>
+        <th>Status</th>
+        <th>Waktu</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{ range .Orders }}
+      <tr>
+        <td>{{ .Invoice }}</td>
+        <td>{{ .ProductName }}</td>
+        <td>{{ .CustomerName }}<br><span class="fine">{{ .CustomerEmail }}</span></td>
+        {{ if $.IsAdmin }}<td>{{ .Seller.StoreName }}</td>{{ end }}
+        <td>{{ formatIDR .GrossAmount }}</td>
+        <td><span class="pill" data-status="{{ .Status }}">{{ statusLabel .Status }}</span></td>
+        <td>{{ formatTime .CreatedAt }}</td>
+      </tr>
+      {{ end }}
+    </tbody>
+  </table>
+</div>
+{{ else }}
+<p class="empty">Belum ada pesanan.</p>
+{{ end }}
+{{ template "admin-bottom" . }}
+{{ end }}

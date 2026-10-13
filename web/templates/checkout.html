@@ -1,0 +1,76 @@
+{{ define "page-checkout" }}
+{{ template "head" . }}
+<main class="wrap">
+  <section class="section">
+    <p class="eyebrow"><a href="/{{ .StoreSlug }}/{{ .ProductSlug }}">Kembali ke penawaran</a></p>
+    <h1>Checkout</h1>
+    <p class="lead">{{ .ProductName }}</p>
+    <p class="price"><strong>{{ formatIDR .Price }}</strong></p>
+    {{ if .Error }}<p class="banner banner-error" role="alert">{{ .Error }}</p>{{ end }}
+    <form method="post" action="/{{ .StoreSlug }}/{{ .ProductSlug }}/checkout" class="stack">
+      <input type="hidden" name="csrf" value="{{ .CSRF }}">
+      <label>Nama
+        <input name="name" required autocomplete="name" value="{{ .Name }}">
+      </label>
+      <label>Email
+        <input name="email" type="email" required autocomplete="email" value="{{ .Email }}">
+      </label>
+      <label>Telepon
+        <input name="phone" type="tel" required autocomplete="tel" inputmode="tel" value="{{ .Phone }}" placeholder="08…">
+      </label>
+      <button class="btn btn-block" type="submit">Lanjut bayar</button>
+    </form>
+  </section>
+</main>
+{{ template "foot" . }}
+{{ end }}
+
+{{ define "page-payment" }}
+{{ template "head" . }}
+<main class="wrap">
+  <section class="section">
+    <h1>{{ .StatusLabel }}</h1>
+    <p class="lead">{{ .ProductName }}</p>
+    <dl class="meta">
+      <div><dt>Invoice</dt><dd>{{ .Invoice }}</dd></div>
+      <div><dt>Email</dt><dd>{{ .Email }}</dd></div>
+      <div><dt>Total</dt><dd>{{ formatIDR .Amount }}</dd></div>
+      <div><dt>Status</dt><dd><span class="pill" data-status="{{ .Status }}">{{ .StatusLabel }}</span></dd></div>
+    </dl>
+    {{ if .Note }}<p class="note">{{ .Note }}</p>{{ end }}
+    {{ if .HasSnap }}
+    <button type="button" class="btn" id="pay-btn" data-token="{{ .Token }}">Bayar sekarang</button>
+    <script src="{{ .SnapJS }}" data-client-key="{{ .ClientKey }}"></script>
+    <script src="/static/js/payment.js" defer></script>
+    {{ else if .RedirectURL }}
+    <a class="btn" href="{{ .RedirectURL }}">Lanjut bayar</a>
+    {{ else if .Pending }}
+    <p class="fine">Tombol bayar muncul setelah Midtrans siap.</p>
+    {{ end }}
+  </section>
+</main>
+{{ template "foot" . }}
+{{ end }}
+
+{{ define "page-login" }}
+{{ template "head" . }}
+<main class="wrap">
+  <section class="section">
+    <h1>Masuk</h1>
+    {{ if .Error }}<p class="banner banner-error" role="alert">{{ .Error }}</p>{{ end }}
+    {{ if .DevHint }}<p class="note">Akun contoh: admin@panic.test dan seller@panic.test. Kata sandi dari SEED_PASSWORD.</p>{{ end }}
+    <form method="post" action="/login" class="stack">
+      <input type="hidden" name="csrf" value="{{ .CSRF }}">
+      <input type="hidden" name="next" value="{{ .Next }}">
+      <label>Email
+        <input name="email" type="email" required autocomplete="username">
+      </label>
+      <label>Kata sandi
+        <input name="password" type="password" required autocomplete="current-password">
+      </label>
+      <button class="btn btn-block" type="submit">Masuk</button>
+    </form>
+  </section>
+</main>
+{{ template "foot" . }}
+{{ end }}

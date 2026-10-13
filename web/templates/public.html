@@ -1,0 +1,63 @@
+{{ define "page-home" }}
+{{ template "head" . }}
+<main class="wrap wrap-wide">
+  <header class="page-head">
+    <h1>Toko produk digital</h1>
+    <p class="lead">Pilih toko untuk melihat produk yang sedang dijual.</p>
+  </header>
+  {{ if .Stores }}
+  <div class="cards">
+    {{ range .Stores }}
+    <a class="card" href="/{{ .Slug }}">
+      <h2>{{ .Name }}</h2>
+      {{ if .Description }}<p>{{ .Description }}</p>{{ end }}
+    </a>
+    {{ end }}
+  </div>
+  {{ else }}
+  <p class="empty">Belum ada toko yang tayang.</p>
+  {{ end }}
+</main>
+{{ template "foot" . }}
+{{ end }}
+
+{{ define "page-store" }}
+{{ template "head" . }}
+<main class="wrap wrap-wide">
+  <header class="page-head">
+    <p class="eyebrow"><a href="/">Semua toko</a></p>
+    <h1>{{ .StoreName }}</h1>
+    {{ if .Description }}<p class="lead">{{ .Description }}</p>{{ end }}
+  </header>
+  {{ if .Products }}
+  <div class="cards">
+    {{ range .Products }}
+    <a class="card product-card" href="{{ .Href }}">
+      {{ if .Image }}<img src="{{ .Image }}" alt="">{{ end }}
+      <h2>{{ .Name }}</h2>
+      {{ if .Summary }}<p>{{ .Summary }}</p>{{ end }}
+      <p class="price">
+        {{ if gt .OriginalPrice .Price }}<s>{{ formatIDR .OriginalPrice }}</s>{{ end }}
+        <strong>{{ formatIDR .Price }}</strong>
+      </p>
+    </a>
+    {{ end }}
+  </div>
+  {{ else }}
+  <p class="empty">Belum ada produk tayang.</p>
+  {{ end }}
+</main>
+{{ template "foot" . }}
+{{ end }}
+
+{{ define "page-message" }}
+{{ template "head" . }}
+<main class="wrap">
+  <section class="section">
+    <h1>{{ .Title }}</h1>
+    <p>{{ .Message }}</p>
+    <p><a href="/">Kembali ke beranda</a></p>
+  </section>
+</main>
+{{ template "foot" . }}
+{{ end }}

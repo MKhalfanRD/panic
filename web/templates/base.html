@@ -1,0 +1,48 @@
+{{ define "head" }}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ .Title }}</title>
+  {{ if .Description }}<meta name="description" content="{{ .Description }}">{{ end }}
+  <meta name="robots" content="{{ if .Robots }}{{ .Robots }}{{ else }}index, follow{{ end }}">
+  {{ if .Canonical }}<link rel="canonical" href="{{ .Canonical }}">{{ end }}
+  <meta property="og:title" content="{{ .Title }}">
+  {{ if .Description }}<meta property="og:description" content="{{ .Description }}">{{ end }}
+  <meta property="og:locale" content="id_ID">
+  {{ if .Canonical }}<meta property="og:url" content="{{ .Canonical }}">{{ end }}
+  {{ if .Image }}<meta property="og:image" content="{{ .Image }}">{{ end }}
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/css/app.css">
+  {{ if .JSONLD }}<script type="application/ld+json">{{ .JSONLD }}</script>{{ end }}
+</head>
+<body class="{{ .BodyClass }}">
+{{ end }}
+
+{{ define "foot" }}
+</body>
+</html>
+{{ end }}
+
+{{ define "admin-top" }}
+{{ template "head" . }}
+<header class="topbar">
+  <a class="brand" href="/admin/products">Panic</a>
+  <nav>
+    <a href="/admin/products">Produk</a>
+    <a href="/admin/orders">Pesanan</a>
+    {{ if .UserName }}<span class="who">{{ .UserName }}</span>{{ end }}
+    <form method="post" action="/logout">
+      <input type="hidden" name="csrf" value="{{ .CSRF }}">
+      <button type="submit" class="btn btn-ghost">Keluar</button>
+    </form>
+  </nav>
+</header>
+<main class="wrap wrap-wide">
+{{ end }}
+
+{{ define "admin-bottom" }}
+</main>
+{{ template "foot" . }}
+{{ end }}
