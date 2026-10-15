@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/gin-gonic/gin"
 
@@ -31,13 +32,7 @@ type view struct {
 
 type homeView struct {
 	view
-	Stores []storeCard
-}
-
-type storeCard struct {
-	Name        string
-	Slug        string
-	Description string
+	Offers []productCard
 }
 
 type storeView struct {
@@ -48,10 +43,12 @@ type storeView struct {
 }
 
 type productCard struct {
+	StoreName     string
 	Name          string
 	Href          string
 	Summary       string
 	Image         string
+	Mark          string
 	Price         int64
 	OriginalPrice int64
 }
@@ -155,6 +152,7 @@ func ParseTemplates() (*template.Template, error) {
 		"formatTime":  domain.FormatJakarta,
 		"statusLabel": domain.StatusLabel,
 		"stars":       stars,
+		"sub":         func(a, b int64) int64 { return a - b },
 	}).ParseFS(web.Files, "templates/*.html")
 }
 
@@ -264,6 +262,31 @@ func safeSnapURL(raw string) string {
 		return raw
 	}
 	return ""
+}
+
+func offerCard(product domain.Product, href string) productCard {
+	image := product.ImageURL
+	if image == "" {
+		image = product.Landing.HeroImageURL
+	}
+	return productCard{
+		Name:          product.Name,
+		Href:          href,
+		Summary:       summaryOf(product),
+		Image:         image,
+		Mark:          markOf(product.Name),
+		Price:         product.Price,
+		OriginalPrice: product.OriginalPrice,
+	}
+}
+
+func markOf(name string) string {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return "P"
+	}
+	r, _ := utf8.DecodeRuneInString(name)
+	return strings.ToUpper(string(r))
 }
 
 func summaryOf(product domain.Product) string {

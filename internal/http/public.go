@@ -13,23 +13,24 @@ import (
 )
 
 func (s *Server) home(c *gin.Context) {
-	stores, err := s.catalog.PublicStores()
+	offers, err := s.catalog.PublicOffers()
 	if err != nil {
 		s.fail(c, err)
 		return
 	}
 	page := homeView{view: s.baseView(c, "Toko produk digital")}
-	page.Description = "Daftar toko produk digital yang sedang tayang."
+	page.Description = "Produk digital yang sedang dijual. Bayar sekali, tanpa langganan."
 	if s.cfg.AppURL != "" {
 		page.Canonical = s.cfg.AppURL + "/"
 	}
-	page.Stores = make([]storeCard, 0, len(stores))
-	for _, store := range stores {
-		page.Stores = append(page.Stores, storeCard{
-			Name:        store.StoreName,
-			Slug:        store.Slug,
-			Description: store.Description,
-		})
+	page.Offers = make([]productCard, 0, len(offers))
+	for _, product := range offers {
+		if product.Seller.Slug == "" {
+			continue
+		}
+		card := offerCard(product, "/"+product.Seller.Slug+"/"+product.Slug)
+		card.StoreName = product.Seller.StoreName
+		page.Offers = append(page.Offers, card)
 	}
 	s.render(c, "page-home", page)
 }
@@ -55,18 +56,7 @@ func (s *Server) store(c *gin.Context) {
 	}
 	page.Products = make([]productCard, 0, len(products))
 	for _, product := range products {
-		image := product.ImageURL
-		if image == "" {
-			image = product.Landing.HeroImageURL
-		}
-		page.Products = append(page.Products, productCard{
-			Name:          product.Name,
-			Href:          "/" + seller.Slug + "/" + product.Slug,
-			Summary:       summaryOf(product),
-			Image:         image,
-			Price:         product.Price,
-			OriginalPrice: product.OriginalPrice,
-		})
+		page.Products = append(page.Products, offerCard(product, "/"+seller.Slug+"/"+product.Slug))
 	}
 	s.render(c, "page-store", page)
 }

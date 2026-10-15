@@ -1,21 +1,43 @@
+{{ define "offer-card" }}
+<a class="offer" href="{{ .Href }}">
+  {{ if .Image }}
+  <img class="offer-img" src="{{ .Image }}" alt="">
+  {{ else }}
+  <span class="offer-mark" aria-hidden="true">{{ .Mark }}</span>
+  {{ end }}
+  <div>
+    {{ if .StoreName }}<p class="eyebrow">{{ .StoreName }}</p>{{ end }}
+    <h2>{{ .Name }}</h2>
+    {{ if .Summary }}<p>{{ .Summary }}</p>{{ end }}
+    {{ if gt .OriginalPrice .Price }}<p class="save">Hemat {{ formatIDR (sub .OriginalPrice .Price) }}</p>{{ end }}
+    <p class="price">
+      {{ if gt .OriginalPrice .Price }}<s>{{ formatIDR .OriginalPrice }}</s>{{ end }}
+      <strong>{{ formatIDR .Price }}</strong>
+    </p>
+    <span class="btn">Lihat penawaran</span>
+  </div>
+</a>
+{{ end }}
+
 {{ define "page-home" }}
 {{ template "head" . }}
-<main class="wrap wrap-wide">
-  <header class="page-head">
-    <h1>Toko produk digital</h1>
-    <p class="lead">Pilih toko untuk melihat produk yang sedang dijual.</p>
+<main class="wrap catalog">
+  <header class="catalog-hero">
+    <p class="eyebrow">Sedang dijual</p>
+    <h1>Produk digital, bayar sekali</h1>
+    <p class="lead">Pilih penawaran di bawah. Tanpa langganan, pembayaran lewat Midtrans.</p>
+    <ul class="pills">
+      <li>Bayar sekali</li>
+      <li>Aman lewat Midtrans</li>
+      <li>Pesanan langsung tercatat</li>
+    </ul>
   </header>
-  {{ if .Stores }}
-  <div class="cards">
-    {{ range .Stores }}
-    <a class="card" href="/{{ .Slug }}">
-      <h2>{{ .Name }}</h2>
-      {{ if .Description }}<p>{{ .Description }}</p>{{ end }}
-    </a>
-    {{ end }}
+  {{ if .Offers }}
+  <div class="offers">
+    {{ range .Offers }}{{ template "offer-card" . }}{{ end }}
   </div>
   {{ else }}
-  <p class="empty">Belum ada toko yang tayang.</p>
+  <p class="empty">Belum ada produk yang tayang.</p>
   {{ end }}
 </main>
 {{ template "foot" . }}
@@ -23,25 +45,15 @@
 
 {{ define "page-store" }}
 {{ template "head" . }}
-<main class="wrap wrap-wide">
-  <header class="page-head">
+<main class="wrap catalog">
+  <header class="catalog-hero">
     <p class="eyebrow"><a href="/">Semua toko</a></p>
     <h1>{{ .StoreName }}</h1>
     {{ if .Description }}<p class="lead">{{ .Description }}</p>{{ end }}
   </header>
   {{ if .Products }}
-  <div class="cards">
-    {{ range .Products }}
-    <a class="card product-card" href="{{ .Href }}">
-      {{ if .Image }}<img src="{{ .Image }}" alt="">{{ end }}
-      <h2>{{ .Name }}</h2>
-      {{ if .Summary }}<p>{{ .Summary }}</p>{{ end }}
-      <p class="price">
-        {{ if gt .OriginalPrice .Price }}<s>{{ formatIDR .OriginalPrice }}</s>{{ end }}
-        <strong>{{ formatIDR .Price }}</strong>
-      </p>
-    </a>
-    {{ end }}
+  <div class="offers">
+    {{ range .Products }}{{ template "offer-card" . }}{{ end }}
   </div>
   {{ else }}
   <p class="empty">Belum ada produk tayang.</p>

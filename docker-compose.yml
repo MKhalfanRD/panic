@@ -1,0 +1,38 @@
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: panic
+      MYSQL_DATABASE: panic
+    ports:
+      - "3306:3306"
+    volumes:
+      - panic-mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-ppanic"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build: .
+    ports:
+      - "8081:8081"
+    environment:
+      HTTP_PORT: "8081"
+      APP_URL: http://localhost:8081
+      APP_ENV: development
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_USER: root
+      DB_PASSWORD: panic
+      DB_NAME: panic
+      JWT_SECRET: dev-only-change-me
+      SEED_PASSWORD: panic-dev
+      MIDTRANS_IS_PRODUCTION: "false"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  panic-mysql:

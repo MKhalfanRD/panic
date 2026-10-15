@@ -13,100 +13,108 @@
       {{ end }}
     </dl>
     {{ end }}
-    <a class="btn" href="{{ .CheckoutURL }}">{{ .CTA }}</a>
+    <a class="btn btn-lg" href="{{ .CheckoutURL }}">{{ .CTA }}</a>
+    <p class="trust">Pembayaran aman lewat Midtrans</p>
   </section>
 
-  {{ if .Problems }}
-  <section class="section">
-    <h2>Yang sering jadi kendala</h2>
-    <ul class="list">
-      {{ range .Problems }}<li>{{ . }}</li>{{ end }}
-    </ul>
-    {{ if .ProblemClose }}<p class="note">{{ .ProblemClose }}</p>{{ end }}
-  </section>
-  {{ end }}
-
-  {{ if .Includes }}
-  <section class="section">
-    <h2>Isi paket</h2>
-    <ul class="tags">
-      {{ range .Includes }}<li>{{ . }}</li>{{ end }}
-    </ul>
-    {{ if .IncludeNote }}<p class="note">{{ .IncludeNote }}</p>{{ end }}
-  </section>
-  {{ end }}
-
-  {{ if .Benefits }}
-  <section class="section">
-    <h2>Yang Anda dapatkan</h2>
-    <ul class="checks">
-      {{ range .Benefits }}<li>{{ . }}</li>{{ end }}
-    </ul>
-  </section>
-  {{ end }}
-
-  {{ if .Bonuses }}
-  <section class="section">
-    <h2>Bonus</h2>
-    <ul class="bonus">
-      {{ range .Bonuses }}
-      <li><span>{{ .Name }}</span>{{ if .Value }}<strong>{{ .Value }}</strong>{{ end }}</li>
+  <div class="lp-layout">
+    <div class="lp-story">
+      {{ if .Problems }}
+      <section class="section">
+        <h2>Yang sering jadi kendala</h2>
+        <ul class="pains">
+          {{ range .Problems }}<li>{{ . }}</li>{{ end }}
+        </ul>
+        {{ if .ProblemClose }}<p class="closer">{{ .ProblemClose }}</p>{{ end }}
+      </section>
       {{ end }}
-    </ul>
-  </section>
-  {{ end }}
 
-  {{ if .Testimonials }}
-  <section class="section">
-    <h2>Cerita pembeli</h2>
-    <div class="quotes">
-      {{ range .Testimonials }}
-      <blockquote>
-        <p class="stars" aria-label="{{ .Stars }} dari 5">{{ range stars .Stars }}<span class="{{ if . }}on{{ end }}">★</span>{{ end }}</p>
-        <p>{{ .Quote }}</p>
-        {{ if .Author }}<footer>{{ .Author }}</footer>{{ end }}
-      </blockquote>
+      {{ if .Includes }}
+      <section class="section">
+        <h2>Isi paket</h2>
+        <ul class="tags">
+          {{ range .Includes }}<li>{{ . }}</li>{{ end }}
+        </ul>
+        {{ if .IncludeNote }}<p class="note">{{ .IncludeNote }}</p>{{ end }}
+      </section>
+      {{ end }}
+
+      {{ if .Benefits }}
+      <section class="section">
+        <h2>Yang Anda dapatkan</h2>
+        <ul class="checks">
+          {{ range .Benefits }}<li>{{ . }}</li>{{ end }}
+        </ul>
+      </section>
+      {{ end }}
+
+      {{ if .Bonuses }}
+      <section class="section">
+        <h2>Bonus</h2>
+        <ul class="bonus">
+          {{ range .Bonuses }}
+          <li><span>{{ .Name }}</span>{{ if .Value }}<strong>{{ .Value }}</strong>{{ end }}</li>
+          {{ end }}
+        </ul>
+      </section>
+      {{ end }}
+
+      {{ if .Testimonials }}
+      <section class="section">
+        <h2>Cerita pembeli</h2>
+        <div class="quotes">
+          {{ range .Testimonials }}
+          <blockquote>
+            <p class="stars" aria-label="{{ .Stars }} dari 5">{{ range stars .Stars }}<span class="{{ if . }}on{{ end }}">★</span>{{ end }}</p>
+            <p>{{ .Quote }}</p>
+            {{ if .Author }}<footer>{{ .Author }}</footer>{{ end }}
+          </blockquote>
+          {{ end }}
+        </div>
+      </section>
       {{ end }}
     </div>
-  </section>
-  {{ end }}
 
-  <section class="section price-card" id="harga">
-    {{ if .Urgency }}<p class="urgency">{{ .Urgency }}</p>{{ end }}
-    <p class="price">
-      {{ if gt .OriginalPrice .Price }}<s>{{ formatIDR .OriginalPrice }}</s>{{ end }}
-      <strong>{{ formatIDR .Price }}</strong>
-    </p>
-    {{ if .HasCountdown }}
-    <div id="countdown" class="countdown" data-offer-ends="{{ .OfferEnds }}" aria-live="polite">
-      <div><strong data-unit="days">00</strong><span>Hari</span></div>
-      <div><strong data-unit="hours">00</strong><span>Jam</span></div>
-      <div><strong data-unit="minutes">00</strong><span>Menit</span></div>
-      <div><strong data-unit="seconds">00</strong><span>Detik</span></div>
-    </div>
+    <aside class="lp-offer">
+      <section class="section price-card" id="harga">
+        {{ if gt .OriginalPrice .Price }}<p class="save">Hemat {{ formatIDR (sub .OriginalPrice .Price) }}</p>{{ end }}
+        {{ if .Urgency }}<p class="urgency">{{ .Urgency }}</p>{{ end }}
+        <p class="price">
+          {{ if gt .OriginalPrice .Price }}<s>{{ formatIDR .OriginalPrice }}</s>{{ end }}
+          <strong>{{ formatIDR .Price }}</strong>
+        </p>
+        {{ if .HasCountdown }}
+        <div id="countdown" class="countdown" data-offer-ends="{{ .OfferEnds }}" aria-live="polite">
+          <div><strong data-unit="days">00</strong><span>Hari</span></div>
+          <div><strong data-unit="hours">00</strong><span>Jam</span></div>
+          <div><strong data-unit="minutes">00</strong><span>Menit</span></div>
+          <div><strong data-unit="seconds">00</strong><span>Detik</span></div>
+        </div>
+        {{ end }}
+        {{ if .Checklist }}
+        <ul class="checks">
+          {{ range .Checklist }}<li>{{ . }}</li>{{ end }}
+        </ul>
+        {{ end }}
+        <a class="btn btn-block btn-lg" href="{{ .CheckoutURL }}">{{ .CTA }}</a>
+        <p class="fine">Bayar sekali. Akses mengikuti status di halaman pembayaran.</p>
+      </section>
+    </aside>
+
+    {{ if .FAQ }}
+    <section class="section lp-faq">
+      <h2>Pertanyaan</h2>
+      <div class="faq">
+        {{ range .FAQ }}
+        <details>
+          <summary>{{ .Question }}</summary>
+          <p>{{ .Answer }}</p>
+        </details>
+        {{ end }}
+      </div>
+    </section>
     {{ end }}
-    {{ if .Checklist }}
-    <ul class="checks">
-      {{ range .Checklist }}<li>{{ . }}</li>{{ end }}
-    </ul>
-    {{ end }}
-    <a class="btn btn-block" href="{{ .CheckoutURL }}">{{ .CTA }}</a>
-    <p class="fine">Pembayaran diproses Midtrans. Pesanan dicatat atas nama dan email Anda.</p>
-  </section>
-
-  {{ if .FAQ }}
-  <section class="section">
-    <h2>Pertanyaan</h2>
-    <div class="faq">
-      {{ range .FAQ }}
-      <details>
-        <summary>{{ .Question }}</summary>
-        <p>{{ .Answer }}</p>
-      </details>
-      {{ end }}
-    </div>
-  </section>
-  {{ end }}
+  </div>
 </article>
 <div class="buybar">
   <div>

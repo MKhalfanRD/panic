@@ -17,11 +17,10 @@ func NewCatalog(db *gorm.DB) *Catalog {
 	return &Catalog{db: db}
 }
 
-func (s *Catalog) PublicStores() ([]domain.Seller, error) {
-	var sellers []domain.Seller
-	sub := s.db.Model(&domain.Product{}).Select("seller_id").Where("status = ?", domain.ProductPublished)
-	err := s.db.Where("id IN (?)", sub).Order("store_name asc").Find(&sellers).Error
-	return sellers, err
+func (s *Catalog) PublicOffers() ([]domain.Product, error) {
+	var products []domain.Product
+	err := s.db.Preload("Seller").Where("status = ?", domain.ProductPublished).Order("name asc").Find(&products).Error
+	return products, err
 }
 
 func (s *Catalog) Store(slug string) (domain.Seller, []domain.Product, error) {
