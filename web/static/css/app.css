@@ -90,9 +90,6 @@ p { margin: 0; text-wrap: pretty; overflow-wrap: break-word; }
 .logo small { font-family: var(--body); font-weight: 500; font-size: 13px; color: var(--ink-3); margin-left: 8px; }
 .crumbs { font-size: 13px; color: var(--ink-3); display: flex; gap: 6px; flex-wrap: wrap; align-items: center; min-width: 0; }
 .crumbs a { color: var(--ink-2); }
-.site-foot { border-top: 1px solid var(--line); margin-top: 56px; padding-block: 24px; color: var(--ink-3); font-size: 13px; }
-.site-foot .wrap { display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between; }
-.site-foot a { color: var(--ink-2); }
 
 /* document cover: used when a product has no image */
 .doc { aspect-ratio: 4 / 3; max-width: 100%; background: var(--accent-soft); display: grid; place-items: center; overflow: hidden; }
@@ -124,10 +121,37 @@ p { margin: 0; text-wrap: pretty; overflow-wrap: break-word; }
 .deadline { font-size: 13.5px; color: var(--ink-2); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
 .deadline b { font-variant-numeric: tabular-nums; color: var(--ink); }
 
+/* home */
+main.wrap { padding-bottom: 64px; }
+.home-hero { display: grid; gap: 28px; padding-block: 44px 32px; align-items: center; }
+.home-hero > * { min-width: 0; }
+.home-hero h1 { font-size: clamp(32px, 6vw, 56px); line-height: 1.02; max-width: 15ch; }
+.home-hero .sub { font-size: 17px; color: var(--ink-2); max-width: 50ch; margin-top: 14px; }
+@media (min-width: 860px) { .home-hero { grid-template-columns: minmax(0, 1fr) 380px; gap: 56px; padding-top: 64px; } }
+.featured { display: block; color: inherit; text-decoration: none; transition: transform .15s; }
+.featured:hover { transform: translateY(-2px); }
+.featured h2 { font-size: 22px; }
+.featured .sum { color: var(--ink-2); font-size: 14px; margin-top: 6px; }
+.how ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+@media (min-width: 760px) { .how ol { grid-template-columns: repeat(3, 1fr); } }
+.how li { display: flex; gap: 14px; padding: 20px; background: var(--surface); }
+.how li > b { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; flex: none; background: var(--accent-soft); color: var(--accent); font: 700 14px var(--mono); }
+.how h3 { font-size: 16px; }
+.how p { font-size: 14px; color: var(--ink-2); margin-top: 2px; }
+.home-sec { padding-top: 48px; display: grid; gap: 18px; scroll-margin-top: 16px; }
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.sec-head h2 { font-size: 26px; }
+.stores { display: grid; gap: 14px; }
+@media (min-width: 640px) { .stores { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 980px) { .stores { grid-template-columns: repeat(3, 1fr); } }
+.store-card { display: flex; gap: 14px; align-items: flex-start; padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); color: inherit; text-decoration: none; transition: border-color .15s; }
+.store-card:hover { border-color: var(--accent); }
+.store-card .avatar { width: 48px; height: 48px; font-size: 20px; border-radius: 12px; }
+.store-card .body { display: grid; gap: 2px; min-width: 0; }
+.store-card .body span { color: var(--ink-2); font-size: 14px; }
+.store-card small { color: var(--accent); font-weight: 600; font-size: 13px; margin-top: 4px; }
+
 /* catalog */
-.cat-head { padding-block: 40px 24px; display: grid; gap: 10px; }
-.cat-head h1 { font-size: clamp(30px, 5.5vw, 48px); max-width: 18ch; line-height: 1.05; }
-.cat-head p { color: var(--ink-2); max-width: 54ch; font-size: 16px; }
 .store-head { display: flex; gap: 16px; align-items: center; padding-block: 36px 20px; }
 .store-head > div { min-width: 0; }
 .avatar { width: 64px; height: 64px; border-radius: 14px; background: var(--ink); color: var(--surface); display: grid; place-items: center; font: 800 26px var(--display); flex: none; }
@@ -362,4 +386,4 @@ textarea.input { min-height: 84px; resize: vertical; }
 .danger p { font-size: 13.5px; color: var(--ink-3); }
 .confirm { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--bad-soft); color: var(--bad); padding: 10px 12px; border-radius: var(--r-md); font-size: 14px; }
 
-@media print { .buybar, .site-head, .site-foot { display: none !important; } }
+@media print { .buybar, .site-head { display: none !important; } }

@@ -32,7 +32,17 @@ type view struct {
 
 type homeView struct {
 	view
-	Offers []productCard
+	Offers   []productCard
+	Featured *productCard
+	Stores   []storeCard
+	MinPrice int64
+}
+
+type storeCard struct {
+	Name        string
+	Href        string
+	Description string
+	Count       int
 }
 
 type storeView struct {

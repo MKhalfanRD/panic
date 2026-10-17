@@ -15,19 +15,70 @@
 
 {{ define "page-home" }}
 {{ template "head" . }}
-<header class="site-head"><div class="wrap"><a class="logo" href="/">Panic</a><span class="crumbs">Produk digital dari penjual kecil</span></div></header>
+<header class="site-head"><div class="wrap"><a class="logo" href="/">Panic</a></div></header>
 <main class="wrap" id="main">
-  <div class="cat-head">
-    <h1>Template dan berkas kerja, bayar sekali</h1>
-    <p>Dokumen siap pakai dari penjual independen. Tanpa langganan. Pembayaran lewat Midtrans, status pesanan bisa dicek kapan saja.</p>
-  </div>
-  {{ if .Offers }}
-  <div class="offers">{{ range .Offers }}{{ template "offer-card" . }}{{ end }}</div>
-  {{ else }}
-  <p class="empty">Belum ada produk yang tayang.</p>
+  <section class="home-hero">
+    <div>
+      <h1>Template dan berkas kerja, bayar sekali</h1>
+      <p class="sub">Dokumen siap pakai dari penjual independen. Tanpa langganan. Pembayaran lewat Midtrans, status pesanan bisa dicek kapan saja.</p>
+      {{ if .Offers }}
+      <ul class="facts">
+        <li><svg class="ic"><use href="#i-check"/></svg><span><b>{{ len .Offers }}</b> produk tayang</span></li>
+        <li><svg class="ic"><use href="#i-check"/></svg><span><b>{{ len .Stores }}</b> toko</span></li>
+        <li><svg class="ic"><use href="#i-check"/></svg><span>Mulai <b>{{ formatIDR .MinPrice }}</b></span></li>
+      </ul>
+      <div class="cta-row"><a class="btn btn-lg" href="#produk">Lihat semua produk</a></div>
+      {{ end }}
+    </div>
+    {{ with .Featured }}
+    <a class="receipt featured" href="{{ .Href }}">
+      <div class="r-head"><span>{{ if gt .OriginalPrice .Price }}Hemat terbesar{{ else }}Pilihan{{ end }}</span><span>{{ .StoreName }}</span></div>
+      <hr>
+      <h2>{{ .Name }}</h2>
+      {{ if .Summary }}<p class="sum">{{ .Summary }}</p>{{ end }}
+      <hr>
+      {{ if gt .OriginalPrice .Price }}
+      <div class="line"><span>Harga normal</span><span class="price-was">{{ formatIDR .OriginalPrice }}</span></div>
+      <div class="line save"><span>Hemat</span><span>−{{ formatIDR (sub .OriginalPrice .Price) }}</span></div>
+      {{ end }}
+      <div class="total"><span>Total</span><strong>{{ formatIDR .Price }}</strong></div>
+      <span class="btn btn-block" style="margin-top:14px">Lihat penawaran</span>
+    </a>
+    {{ end }}
+  </section>
+
+  <section class="how" aria-labelledby="how-h">
+    <h2 id="how-h" class="sr">Cara membeli</h2>
+    <ol>
+      <li><b>1</b><div><h3>Pilih produk</h3><p>Baca isi paket dan harga di halaman produk.</p></div></li>
+      <li><b>2</b><div><h3>Bayar lewat Midtrans</h3><p>Isi nama, email, dan telepon, lalu pilih metode bayar.</p></div></li>
+      <li><b>3</b><div><h3>Terima berkas</h3><p>Setelah lunas, penjual mengirim berkas ke email Anda.</p></div></li>
+    </ol>
+  </section>
+
+  <section class="home-sec" id="produk">
+    <div class="sec-head"><h2>Semua produk</h2>{{ if .Offers }}<span class="muted">{{ len .Offers }} produk</span>{{ end }}</div>
+    {{ if .Offers }}
+    <div class="offers">{{ range .Offers }}{{ template "offer-card" . }}{{ end }}</div>
+    {{ else }}
+    <p class="empty">Belum ada produk yang tayang.</p>
+    {{ end }}
+  </section>
+
+  {{ if .Stores }}
+  <section class="home-sec">
+    <div class="sec-head"><h2>Toko</h2></div>
+    <div class="stores">
+      {{ range .Stores }}
+      <a class="store-card" href="{{ .Href }}">
+        <span class="avatar" aria-hidden="true">{{ initial .Name }}</span>
+        <span class="body"><b>{{ .Name }}</b>{{ if .Description }}<span>{{ .Description }}</span>{{ end }}<small>{{ .Count }} produk</small></span>
+      </a>
+      {{ end }}
+    </div>
+  </section>
   {{ end }}
 </main>
-{{ template "site-foot" . }}
 {{ template "foot" . }}
 {{ end }}
 
@@ -45,7 +96,6 @@
   <p class="empty">Toko ini belum punya produk yang tayang.</p>
   {{ end }}
 </main>
-{{ template "site-foot" . }}
 {{ template "foot" . }}
 {{ end }}
 

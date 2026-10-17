@@ -24,6 +24,7 @@ func (s *Server) home(c *gin.Context) {
 		page.Canonical = s.cfg.AppURL + "/"
 	}
 	page.Offers = make([]productCard, 0, len(offers))
+	stores := map[string]int{}
 	for _, product := range offers {
 		if product.Seller.Slug == "" {
 			continue
@@ -31,8 +32,35 @@ func (s *Server) home(c *gin.Context) {
 		card := offerCard(product, "/"+product.Seller.Slug+"/"+product.Slug)
 		card.StoreName = product.Seller.StoreName
 		page.Offers = append(page.Offers, card)
+		if i, ok := stores[product.Seller.Slug]; ok {
+			page.Stores[i].Count++
+		} else {
+			stores[product.Seller.Slug] = len(page.Stores)
+			page.Stores = append(page.Stores, storeCard{
+				Name: product.Seller.StoreName, Href: "/" + product.Seller.Slug,
+				Description: product.Seller.Description, Count: 1,
+			})
+		}
+		if page.MinPrice == 0 || card.Price < page.MinPrice {
+			page.MinPrice = card.Price
+		}
 	}
+	page.Featured = featuredOffer(page.Offers)
 	s.render(c, "page-home", page)
+}
+
+// featuredOffer picks the offer with the largest discount, or the first one when none is discounted.
+func featuredOffer(offers []productCard) *productCard {
+	if len(offers) == 0 {
+		return nil
+	}
+	best := 0
+	for i, o := range offers {
+		if o.OriginalPrice-o.Price > offers[best].OriginalPrice-offers[best].Price {
+			best = i
+		}
+	}
+	return &offers[best]
 }
 
 func (s *Server) store(c *gin.Context) {

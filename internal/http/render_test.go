@@ -16,7 +16,9 @@ func TestTemplatesExecute(t *testing.T) {
 	}
 	ends := time.Now().Add(time.Hour)
 	pages := map[string]any{
-		"page-home": homeView{view: view{Title: "Beranda"}},
+		"page-home": homeView{view: view{Title: "Beranda"}, Offers: []productCard{{Name: "Paket", Href: "/toko/paket", Price: 1000, OriginalPrice: 2000}},
+			Featured: &productCard{Name: "Paket", Href: "/toko/paket", Price: 1000, OriginalPrice: 2000}, Stores: []storeCard{{Name: "Toko", Href: "/toko", Count: 1}}, MinPrice: 1000},
+		"page-home-empty": homeView{view: view{Title: "Beranda"}},
 		"page-store": storeView{view: view{Title: "Toko"}, Products: []productCard{{
 			Name: "Paket", Href: "/toko/paket", Price: 1000, OriginalPrice: 2000,
 		}}},
@@ -57,7 +59,8 @@ func TestTemplatesExecute(t *testing.T) {
 			IsNew:      false,
 		},
 	}
-	for name, data := range pages {
+	for key, data := range pages {
+		name := strings.TrimSuffix(key, "-empty")
 		if tmpl.Lookup(name) == nil {
 			t.Errorf("missing %s", name)
 			continue
@@ -93,5 +96,15 @@ func TestStatusKindAndPaidPayment(t *testing.T) {
 	}
 	if !strings.Contains(buf.String(), "Pembayaran diterima") {
 		t.Error("paid page should say the payment was received")
+	}
+}
+
+func TestFeaturedOfferPicksLargestDiscount(t *testing.T) {
+	if featuredOffer(nil) != nil {
+		t.Fatal("no offers should give no featured offer")
+	}
+	offers := []productCard{{Name: "A", Price: 100, OriginalPrice: 120}, {Name: "B", Price: 100, OriginalPrice: 200}, {Name: "C", Price: 50}}
+	if got := featuredOffer(offers); got.Name != "B" {
+		t.Fatalf("got %s, want B", got.Name)
 	}
 }
