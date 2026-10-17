@@ -61,14 +61,16 @@ func (s *Server) checkoutSubmit(c *gin.Context) {
 func (s *Server) checkoutPage(c *gin.Context, seller domain.Seller, product domain.Product, name, email, phone, message string) checkoutView {
 	page := checkoutView{
 		view:        s.baseView(c, "Checkout — "+product.Name),
-		StoreSlug:   seller.Slug,
-		ProductSlug: product.Slug,
-		ProductName: product.Name,
-		Price:       product.Price,
-		Name:        name,
-		Email:       email,
-		Phone:       phone,
-		Error:       message,
+		StoreSlug:     seller.Slug,
+		StoreName:     seller.StoreName,
+		ProductSlug:   product.Slug,
+		ProductName:   product.Name,
+		Price:         product.Price,
+		OriginalPrice: product.OriginalPrice,
+		Name:          name,
+		Email:         email,
+		Phone:         phone,
+		Error:         message,
 	}
 	page.Robots = "noindex, nofollow"
 	page.Description = "Isi nama, email, dan telepon untuk melanjutkan pembayaran."
@@ -109,6 +111,9 @@ func (s *Server) payment(c *gin.Context) {
 		view:        s.baseView(c, "Status pembayaran"),
 		Invoice:     order.Invoice,
 		ProductName: order.ProductName,
+		StoreName:   order.Seller.StoreName,
+		StoreSlug:   order.Seller.Slug,
+		CreatedAt:   domain.FormatJakarta(order.CreatedAt),
 		Email:       order.CustomerEmail,
 		Amount:      order.GrossAmount,
 		Status:      order.Status,
@@ -118,6 +123,9 @@ func (s *Server) payment(c *gin.Context) {
 		RedirectURL: safeSnapURL(order.SnapRedirectURL),
 	}
 	page.Robots = "noindex, nofollow"
+	if order.PaidAt != nil {
+		page.PaidAt = domain.FormatJakarta(*order.PaidAt)
+	}
 	if page.Pending && order.SnapToken != "" && s.payments.ClientKey() != "" {
 		page.HasSnap = true
 		page.SnapJS = s.payments.SnapJS()

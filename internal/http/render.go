@@ -86,11 +86,13 @@ type testiView struct {
 
 type checkoutView struct {
 	view
-	StoreSlug   string
-	ProductSlug string
-	ProductName string
-	Price       int64
-	Name        string
+	StoreSlug     string
+	StoreName     string
+	ProductSlug   string
+	ProductName   string
+	Price         int64
+	OriginalPrice int64
+	Name          string
 	Email       string
 	Phone       string
 	Error       string
@@ -100,6 +102,10 @@ type paymentView struct {
 	view
 	Invoice     string
 	ProductName string
+	StoreName   string
+	StoreSlug   string
+	CreatedAt   string
+	PaidAt      string
 	Email       string
 	Amount      int64
 	Status      string
@@ -153,7 +159,28 @@ func ParseTemplates() (*template.Template, error) {
 		"statusLabel": domain.StatusLabel,
 		"stars":       stars,
 		"sub":         func(a, b int64) int64 { return a - b },
+		"statusKind":  statusKind,
+		"initial":     initial,
 	}).ParseFS(web.Files, "templates/*.html")
+}
+
+// statusKind groups payment statuses into the three looks the UI has.
+func statusKind(status string) string {
+	switch {
+	case domain.IsPaidStatus(status):
+		return "paid"
+	case domain.CanPay(status):
+		return "pending"
+	default:
+		return "closed"
+	}
+}
+
+func initial(name string) string {
+	for _, r := range strings.TrimSpace(name) {
+		return strings.ToUpper(string(r))
+	}
+	return ""
 }
 
 func stars(n int) []bool {
@@ -207,7 +234,7 @@ func (s *Server) adminView(c *gin.Context, title string) view {
 func (s *Server) notFound(c *gin.Context) {
 	s.renderStatus(c, http.StatusNotFound, "page-message", messageView{
 		view:    s.baseView(c, "Halaman tidak ditemukan"),
-		Message: "Halaman yang Anda cari tidak ada.",
+		Message: "Link mungkin salah ketik, atau produknya sudah tidak dijual. Untuk status pesanan, buka link halaman pembayaran yang Anda simpan.",
 	})
 }
 

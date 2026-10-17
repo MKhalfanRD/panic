@@ -3,6 +3,7 @@ package domain
 import (
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestValidateProductPublishedRequiresHeadlineAndPrice(t *testing.T) {
@@ -119,5 +120,12 @@ func TestParseOfferInput(t *testing.T) {
 	empty, err := ParseOfferInput("  ")
 	if err != nil || empty != nil {
 		t.Fatal(empty, err)
+	}
+}
+
+func TestFormatJakarta(t *testing.T) {
+	at := time.Date(2026, time.October, 17, 10, 29, 0, 0, time.UTC)
+	if got := FormatJakarta(at); got != "17 Okt 2026, 17.29" {
+		t.Fatalf("got %q", got)
 	}
 }

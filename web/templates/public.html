@@ -1,75 +1,63 @@
 {{ define "offer-card" }}
 <a class="offer" href="{{ .Href }}">
-  {{ if .Image }}
-  <img class="offer-img" src="{{ .Image }}" alt="">
-  {{ else }}
-  <span class="offer-mark" aria-hidden="true">{{ .Mark }}</span>
-  {{ end }}
-  <div>
-    {{ if .StoreName }}<p class="eyebrow">{{ .StoreName }}</p>{{ end }}
+  {{ if .Image }}<img class="offer-img" src="{{ .Image }}" alt="" loading="lazy" width="480" height="360">{{ else }}{{ template "doc-cover" }}{{ end }}
+  <div class="body">
+    {{ if .StoreName }}<span class="store">{{ .StoreName }}</span>{{ end }}
     <h2>{{ .Name }}</h2>
-    {{ if .Summary }}<p>{{ .Summary }}</p>{{ end }}
-    {{ if gt .OriginalPrice .Price }}<p class="save">Hemat {{ formatIDR (sub .OriginalPrice .Price) }}</p>{{ end }}
-    <p class="price">
-      {{ if gt .OriginalPrice .Price }}<s>{{ formatIDR .OriginalPrice }}</s>{{ end }}
+    {{ if .Summary }}<p class="sum">{{ .Summary }}</p>{{ end }}
+    <div class="foot">
       <strong>{{ formatIDR .Price }}</strong>
-    </p>
-    <span class="btn">Lihat penawaran</span>
+      {{ if gt .OriginalPrice .Price }}<span class="price-was">{{ formatIDR .OriginalPrice }}</span><span class="save">Hemat {{ formatIDR (sub .OriginalPrice .Price) }}</span>{{ end }}
+    </div>
   </div>
 </a>
 {{ end }}
 
 {{ define "page-home" }}
 {{ template "head" . }}
-<main class="wrap catalog">
-  <header class="catalog-hero">
-    <p class="eyebrow">Sedang dijual</p>
-    <h1>Produk digital, bayar sekali</h1>
-    <p class="lead">Pilih penawaran di bawah. Tanpa langganan, pembayaran lewat Midtrans.</p>
-    <ul class="pills">
-      <li>Bayar sekali</li>
-      <li>Aman lewat Midtrans</li>
-      <li>Pesanan langsung tercatat</li>
-    </ul>
-  </header>
-  {{ if .Offers }}
-  <div class="offers">
-    {{ range .Offers }}{{ template "offer-card" . }}{{ end }}
+<header class="site-head"><div class="wrap"><a class="logo" href="/">Panic</a><span class="crumbs">Produk digital dari penjual kecil</span></div></header>
+<main class="wrap" id="main">
+  <div class="cat-head">
+    <h1>Template dan berkas kerja, bayar sekali</h1>
+    <p>Dokumen siap pakai dari penjual independen. Tanpa langganan. Pembayaran lewat Midtrans, status pesanan bisa dicek kapan saja.</p>
   </div>
+  {{ if .Offers }}
+  <div class="offers">{{ range .Offers }}{{ template "offer-card" . }}{{ end }}</div>
   {{ else }}
   <p class="empty">Belum ada produk yang tayang.</p>
   {{ end }}
 </main>
+{{ template "site-foot" . }}
 {{ template "foot" . }}
 {{ end }}
 
 {{ define "page-store" }}
 {{ template "head" . }}
-<main class="wrap catalog">
-  <header class="catalog-hero">
-    <p class="eyebrow"><a href="/">Semua toko</a></p>
-    <h1>{{ .StoreName }}</h1>
-    {{ if .Description }}<p class="lead">{{ .Description }}</p>{{ end }}
-  </header>
-  {{ if .Products }}
-  <div class="offers">
-    {{ range .Products }}{{ template "offer-card" . }}{{ end }}
+<header class="site-head"><div class="wrap"><a class="logo" href="/">Panic</a><nav class="crumbs" aria-label="Lokasi"><a href="/">Semua produk</a><span aria-hidden="true">/</span><span>{{ .StoreName }}</span></nav></div></header>
+<main class="wrap" id="main">
+  <div class="store-head">
+    <div class="avatar" aria-hidden="true">{{ initial .StoreName }}</div>
+    <div><h1>{{ .StoreName }}</h1>{{ if .Description }}<p>{{ .Description }}</p>{{ end }}</div>
   </div>
+  {{ if .Products }}
+  <div class="offers">{{ range .Products }}{{ template "offer-card" . }}{{ end }}</div>
   {{ else }}
-  <p class="empty">Belum ada produk tayang.</p>
+  <p class="empty">Toko ini belum punya produk yang tayang.</p>
   {{ end }}
 </main>
+{{ template "site-foot" . }}
 {{ template "foot" . }}
 {{ end }}
 
 {{ define "page-message" }}
 {{ template "head" . }}
-<main class="wrap">
-  <section class="section">
+<header class="site-head"><div class="wrap"><a class="logo" href="/">Panic</a></div></header>
+<main class="center" id="main">
+  <div class="nf">
     <h1>{{ .Title }}</h1>
     <p>{{ .Message }}</p>
-    <p><a href="/">Kembali ke beranda</a></p>
-  </section>
+    <div class="links"><a class="btn" href="/">Lihat semua produk</a></div>
+  </div>
 </main>
 {{ template "foot" . }}
 {{ end }}

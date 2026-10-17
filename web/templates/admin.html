@@ -1,74 +1,84 @@
 {{ define "page-products" }}
 {{ template "admin-top" . }}
-<div class="page-head row">
-  <h1>Produk</h1>
-  <a class="btn" href="/admin/products/new">Tambah produk</a>
+<div class="a-head">
+  <div><h1>Produk</h1><p>{{ len .Products }} produk</p></div>
+  <a class="btn" href="/admin/products/new"><svg class="ic"><use href="#i-plus"/></svg>Tambah produk</a>
 </div>
 {{ if .Products }}
-<div class="table-wrap">
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Nama</th>
-        {{ if .IsAdmin }}<th>Toko</th>{{ end }}
-        <th>Harga</th>
-        <th>Status</th>
-        <th></th>
-      </tr>
-    </thead>
+<div class="panel">
+  <table class="tbl collapse">
+    <thead><tr><th>Produk</th>{{ if .IsAdmin }}<th>Toko</th>{{ end }}<th>Status</th><th class="r">Harga</th><th><span class="sr">Aksi</span></th></tr></thead>
     <tbody>
       {{ range .Products }}
       <tr>
-        <td>{{ .Name }}</td>
+        <td><div class="prod">{{ if .ImageURL }}<img src="{{ .ImageURL }}" alt="" width="52" height="52" loading="lazy">{{ else }}{{ template "doc-cover" }}{{ end }}<div><b>{{ .Name }}</b><small>/{{ .Seller.Slug }}/{{ .Slug }}</small></div></div></td>
         {{ if $.IsAdmin }}<td>{{ .Seller.StoreName }}</td>{{ end }}
-        <td>{{ formatIDR .Price }}</td>
-        <td><span class="pill" data-status="{{ .Status }}">{{ if eq .Status "published" }}Tayang{{ else }}Draf{{ end }}</span></td>
-        <td><a href="/admin/products/{{ .ID }}/edit">Ubah</a></td>
+        <td><span class="chip k-{{ .Status }}">{{ if eq .Status "published" }}Tayang{{ else }}Draf{{ end }}</span></td>
+        <td class="r">{{ formatIDR .Price }}</td>
+        <td><div class="acts">{{ if eq .Status "published" }}<a href="/{{ .Seller.Slug }}/{{ .Slug }}">Lihat</a>{{ end }}<a href="/admin/products/{{ .ID }}/edit">Ubah</a></div></td>
       </tr>
       {{ end }}
     </tbody>
   </table>
+  <div class="cards">
+    {{ range .Products }}
+    <div>
+      <div class="row1"><b>{{ .Name }}</b><span class="chip k-{{ .Status }}">{{ if eq .Status "published" }}Tayang{{ else }}Draf{{ end }}</span></div>
+      <div class="row2"><span class="num">{{ formatIDR .Price }}{{ if $.IsAdmin }} · {{ .Seller.StoreName }}{{ end }}</span><span class="acts">{{ if eq .Status "published" }}<a href="/{{ .Seller.Slug }}/{{ .Slug }}">Lihat</a>{{ end }}<a href="/admin/products/{{ .ID }}/edit">Ubah</a></span></div>
+    </div>
+    {{ end }}
+  </div>
 </div>
 {{ else }}
-<p class="empty">Belum ada produk.</p>
+<div class="empty">
+  <p>Belum ada produk.</p>
+  <p style="margin-top:12px"><a class="btn" href="/admin/products/new">Buat produk pertama</a></p>
+</div>
 {{ end }}
 {{ template "admin-bottom" . }}
 {{ end }}
 
 {{ define "page-orders" }}
 {{ template "admin-top" . }}
-<h1>Pesanan</h1>
+<div class="a-head"><div><h1>Pesanan</h1><p>{{ len .Orders }} pesanan terbaru</p></div></div>
 {{ if .Orders }}
-<div class="table-wrap">
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Invoice</th>
-        <th>Produk</th>
-        <th>Pembeli</th>
-        {{ if .IsAdmin }}<th>Toko</th>{{ end }}
-        <th>Total</th>
-        <th>Status</th>
-        <th>Waktu</th>
-      </tr>
-    </thead>
+<div class="filters" role="group" aria-label="Saring status" data-filters>
+  <button type="button" aria-pressed="true" data-f="all">Semua<span></span></button>
+  <button type="button" aria-pressed="false" data-f="pending">Menunggu<span></span></button>
+  <button type="button" aria-pressed="false" data-f="paid">Lunas<span></span></button>
+  <button type="button" aria-pressed="false" data-f="closed">Batal &amp; kedaluwarsa<span></span></button>
+</div>
+<div class="panel">
+  <table class="tbl collapse">
+    <thead><tr><th>Invoice</th><th>Pembeli</th><th>Produk</th>{{ if .IsAdmin }}<th>Toko</th>{{ end }}<th>Status</th><th class="r">Total</th><th class="r">Waktu</th></tr></thead>
     <tbody>
       {{ range .Orders }}
-      <tr>
-        <td>{{ .Invoice }}</td>
+      <tr data-k="{{ statusKind .Status }}">
+        <td><a class="mono" href="/bayar/{{ .Invoice }}">{{ .Invoice }}</a></td>
+        <td>{{ .CustomerName }}<br><small class="muted">{{ .CustomerEmail }}</small></td>
         <td>{{ .ProductName }}</td>
-        <td>{{ .CustomerName }}<br><span class="fine">{{ .CustomerEmail }}</span></td>
         {{ if $.IsAdmin }}<td>{{ .Seller.StoreName }}</td>{{ end }}
-        <td>{{ formatIDR .GrossAmount }}</td>
-        <td><span class="pill" data-status="{{ .Status }}">{{ statusLabel .Status }}</span></td>
-        <td>{{ formatTime .CreatedAt }}</td>
+        <td><span class="chip k-{{ statusKind .Status }}">{{ statusLabel .Status }}</span></td>
+        <td class="r">{{ formatIDR .GrossAmount }}</td>
+        <td class="r">{{ formatTime .CreatedAt }}</td>
       </tr>
       {{ end }}
     </tbody>
   </table>
+  <div class="cards">
+    {{ range .Orders }}
+    <div data-k="{{ statusKind .Status }}">
+      <div class="row1"><a class="mono" href="/bayar/{{ .Invoice }}">{{ .Invoice }}</a><span class="chip k-{{ statusKind .Status }}">{{ statusLabel .Status }}</span></div>
+      <div class="row2"><span>{{ .CustomerName }} · {{ .ProductName }}</span><span class="num">{{ formatIDR .GrossAmount }}</span></div>
+      <div class="row2"><span>{{ .CustomerEmail }}</span><span>{{ formatTime .CreatedAt }}</span></div>
+    </div>
+    {{ end }}
+  </div>
+  <p class="empty" data-none hidden style="border:0;border-radius:0">Tidak ada pesanan dengan status ini.</p>
 </div>
+<script src="/static/js/admin.js" defer></script>
 {{ else }}
-<p class="empty">Belum ada pesanan.</p>
+<p class="empty">Belum ada pesanan. Pesanan muncul di sini begitu pembeli menyelesaikan checkout.</p>
 {{ end }}
 {{ template "admin-bottom" . }}
 {{ end }}

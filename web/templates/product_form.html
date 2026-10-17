@@ -1,323 +1,242 @@
+{{ define "rm" }}<button type="button" class="x" data-remove aria-label="Hapus baris"><svg class="ic"><use href="#i-x"/></svg></button>{{ end }}
+
 {{ define "page-product-form" }}
 {{ template "admin-top" . }}
-<div class="page-head">
-  <h1>{{ if .IsNew }}Produk baru{{ else }}Ubah produk{{ end }}</h1>
-  {{ if .PublicPath }}<p><a href="{{ .PublicPath }}">Lihat halaman</a></p>{{ end }}
+<a class="back" href="/admin/products"><svg class="ic"><use href="#i-back"/></svg>Semua produk</a>
+<div class="a-head" style="margin-top:8px">
+  <div>
+    <h1>{{ if .IsNew }}Produk baru{{ else }}{{ .Product.Name }}{{ end }}</h1>
+    {{ if .PublicPath }}<p>{{ .PublicPath }}</p>{{ end }}
+  </div>
+  {{ if .PublicPath }}<a class="btn btn-quiet" href="{{ .PublicPath }}"><svg class="ic"><use href="#i-ext"/></svg>Lihat halaman</a>{{ end }}
 </div>
-{{ if .Saved }}<p class="banner" role="status">Tersimpan.</p>{{ end }}
-{{ if .Error }}<p class="banner banner-error" role="alert">{{ .Error }}</p>{{ end }}
+{{ if .Saved }}<p class="banner" role="status" style="margin-bottom:16px">Perubahan tersimpan.</p>{{ end }}
+{{ if .Error }}<p class="banner banner-error" role="alert" style="margin-bottom:16px">{{ .Error }}</p>{{ end }}
 
-<form method="post" action="{{ if .IsNew }}/admin/products{{ else }}/admin/products/{{ .Product.ID }}{{ end }}" class="stack" id="product-form">
-  <input type="hidden" name="csrf" value="{{ .CSRF }}">
+<div class="pf">
+  <nav class="toc" aria-label="Bagian formulir">
+    <a href="#f-produk">Produk &amp; harga</a>
+    <a href="#f-hero">Pembuka</a>
+    <a href="#f-isi">Masalah &amp; isi paket</a>
+    <a href="#f-bukti">Bonus &amp; testimoni</a>
+    <a href="#f-tawar">Penawaran</a>
+    <a href="#f-faq">FAQ</a>
+    <a href="#f-seo">SEO</a>
+  </nav>
 
-  <fieldset>
-    <legend>Produk</legend>
-    {{ if .IsAdmin }}
-    <label>Toko
-      <select name="seller_id" required>
-        <option value="">Pilih toko</option>
-        {{ range .Sellers }}
-        <option value="{{ .ID }}"{{ if eq .ID $.Product.SellerID }} selected{{ end }}>{{ .StoreName }}</option>
+  <div>
+  <form method="post" action="{{ if .IsNew }}/admin/products{{ else }}/admin/products/{{ .Product.ID }}{{ end }}" id="product-form" data-busy="Menyimpan…">
+    <input type="hidden" name="csrf" value="{{ .CSRF }}">
+
+    <section class="fs" id="f-produk">
+      <header><h2>Produk &amp; harga</h2><p>Yang tampil di katalog dan di tabel pesanan.</p></header>
+      <div class="two">
+        <div class="field"><label for="name">Nama produk</label><input class="input" id="name" name="name" required value="{{ .Product.Name }}"></div>
+        <div class="field">
+          <label for="slug">Alamat halaman</label>
+          <input class="input" id="slug" name="slug" required spellcheck="false" autocomplete="off" value="{{ .Product.Slug }}" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" aria-describedby="slug-h">
+          <span class="hint" id="slug-h">Terisi otomatis dari nama. Huruf kecil, angka, dan tanda hubung.</span>
+        </div>
+      </div>
+      <div class="two">
+        <div class="field"><label for="category_id">Kategori</label>
+          <select class="input" id="category_id" name="category_id" required>
+            <option value="">Pilih kategori</option>
+            {{ range .Categories }}<option value="{{ .ID }}"{{ if eq .ID $.Product.CategoryID }} selected{{ end }}>{{ .Name }}</option>{{ end }}
+          </select>
+        </div>
+        {{ if .IsAdmin }}
+        <div class="field"><label for="seller_id">Toko</label>
+          <select class="input" id="seller_id" name="seller_id" required>
+            <option value="">Pilih toko</option>
+            {{ range .Sellers }}<option value="{{ .ID }}"{{ if eq .ID $.Product.SellerID }} selected{{ end }}>{{ .StoreName }}</option>{{ end }}
+          </select>
+        </div>
+        {{ else }}
+        <input type="hidden" name="seller_id" value="{{ .Product.SellerID }}">
         {{ end }}
-      </select>
-    </label>
-    {{ else }}
-    <input type="hidden" name="seller_id" value="{{ .Product.SellerID }}">
-    {{ end }}
-    <label>Kategori
-      <select name="category_id" required>
-        <option value="">Pilih kategori</option>
-        {{ range .Categories }}
-        <option value="{{ .ID }}"{{ if eq .ID $.Product.CategoryID }} selected{{ end }}>{{ .Name }}</option>
-        {{ end }}
-      </select>
-    </label>
-    <div class="row-2">
-      <label>Nama
-        <input id="name" name="name" required value="{{ .Product.Name }}">
-      </label>
-      <label>Slug
-        <input id="slug" name="slug" required value="{{ .Product.Slug }}" pattern="[a-z0-9]+(?:-[a-z0-9]+)*">
-      </label>
-    </div>
-    <div class="row-2">
-      <label>Harga jual
-        <input name="price" inputmode="numeric" required value="{{ if .Product.Price }}{{ .Product.Price }}{{ end }}">
-      </label>
-      <label>Harga coret
-        <input name="original_price" inputmode="numeric" value="{{ if .Product.OriginalPrice }}{{ .Product.OriginalPrice }}{{ end }}">
-      </label>
-    </div>
-    <div class="row-2">
-      <label>Status
-        <select name="status">
-          <option value="draft"{{ if eq .Product.Status "draft" }} selected{{ end }}>Draf</option>
-          <option value="published"{{ if eq .Product.Status "published" }} selected{{ end }}>Tayang</option>
-        </select>
-      </label>
-      <label>URL gambar
-        <input name="image_url" value="{{ .Product.ImageURL }}" placeholder="https://…">
-      </label>
-    </div>
-  </fieldset>
+      </div>
+      <div class="two">
+        <div class="field"><label for="price">Harga jual</label>
+          <div class="affix"><span>Rp</span><input class="input num" id="price" name="price" inputmode="numeric" autocomplete="off" required value="{{ if .Product.Price }}{{ .Product.Price }}{{ end }}" data-idr></div>
+        </div>
+        <div class="field"><label for="original_price">Harga coret <span class="opt">(opsional)</span></label>
+          <div class="affix"><span>Rp</span><input class="input num" id="original_price" name="original_price" inputmode="numeric" autocomplete="off" value="{{ if .Product.OriginalPrice }}{{ .Product.OriginalPrice }}{{ end }}" data-idr></div>
+          <span class="calc" data-saving aria-live="polite"></span>
+        </div>
+      </div>
+      <div class="field"><label for="image_url">URL gambar produk <span class="opt">(opsional)</span></label>
+        <input class="input" id="image_url" name="image_url" type="url" spellcheck="false" autocomplete="off" value="{{ .Product.ImageURL }}" placeholder="https://…" aria-describedby="img-h">
+        <span class="hint" id="img-h">Kosongkan untuk memakai sampul dokumen otomatis.</span>
+      </div>
+    </section>
 
-  <fieldset>
-    <legend>SEO</legend>
-    <label>Judul
-      <input name="meta_title" value="{{ .Product.Landing.MetaTitle }}">
-    </label>
-    <label>Deskripsi
-      <textarea name="meta_description">{{ .Product.Landing.MetaDescription }}</textarea>
-    </label>
-  </fieldset>
-
-  <fieldset>
-    <legend>Hero</legend>
-    <label>Headline
-      <input name="hero_headline" value="{{ .Product.Landing.HeroHeadline }}">
-    </label>
-    <label>Subheadline
-      <textarea name="hero_subhead">{{ .Product.Landing.HeroSubhead }}</textarea>
-    </label>
-    <label>URL gambar hero
-      <input name="hero_image_url" value="{{ .Product.Landing.HeroImageURL }}" placeholder="https://…">
-    </label>
-    <div class="repeater" data-repeater data-max="4">
-      <div class="repeater-rows">
-        {{ range .Product.Landing.Stats }}
-        <div class="repeater-row">
-          <div class="fields cols-2">
-            <label>Angka <input name="stat_value" value="{{ .Value }}"></label>
-            <label>Label <input name="stat_label" value="{{ .Label }}"></label>
+    <section class="fs" id="f-hero">
+      <header><h2>Pembuka</h2><p>Bagian pertama halaman produk.</p></header>
+      <div class="field"><label for="hero_headline">Judul utama</label><input class="input" id="hero_headline" name="hero_headline" value="{{ .Product.Landing.HeroHeadline }}"></div>
+      <div class="field"><label for="hero_subhead">Kalimat pendukung</label><textarea class="input" id="hero_subhead" name="hero_subhead">{{ .Product.Landing.HeroSubhead }}</textarea></div>
+      <div class="field"><label for="hero_image_url">URL gambar pembuka <span class="opt">(opsional)</span></label><input class="input" id="hero_image_url" name="hero_image_url" type="url" spellcheck="false" autocomplete="off" value="{{ .Product.Landing.HeroImageURL }}" placeholder="https://…"></div>
+      <div class="field">
+        <span class="label">Fakta singkat <span class="opt">(maks. 4)</span></span>
+        <div class="rep pair" data-repeater data-max="4">
+          <div class="rep-head"><span>Isi</span><span>Keterangan</span><span></span></div>
+          <div class="rep-rows">
+            {{ range .Product.Landing.Stats }}<div class="rep-row"><input class="input" name="stat_value" aria-label="Isi" value="{{ .Value }}"><input class="input" name="stat_label" aria-label="Keterangan" value="{{ .Label }}">{{ template "rm" }}</div>{{ end }}
           </div>
-          <button type="button" class="btn btn-ghost" data-remove>Hapus</button>
+          <template><div class="rep-row"><input class="input" name="stat_value" aria-label="Isi"><input class="input" name="stat_label" aria-label="Keterangan">{{ template "rm" }}</div></template>
+          <button type="button" class="add" data-add><svg class="ic"><use href="#i-plus"/></svg>Tambah fakta</button>
         </div>
-        {{ end }}
       </div>
-      <template>
-        <div class="repeater-row">
-          <div class="fields cols-2">
-            <label>Angka <input name="stat_value"></label>
-            <label>Label <input name="stat_label"></label>
+    </section>
+
+    <section class="fs" id="f-isi">
+      <header><h2>Masalah &amp; isi paket</h2><p>Kendala pembeli, lalu apa yang mereka terima.</p></header>
+      <div class="field">
+        <span class="label">Kendala pembeli</span>
+        <div class="rep" data-repeater data-max="8">
+          <div class="rep-rows">
+            {{ range .Product.Landing.Problems }}<div class="rep-row"><input class="input" name="problem" aria-label="Kendala" value="{{ . }}">{{ template "rm" }}</div>{{ end }}
           </div>
-          <button type="button" class="btn btn-ghost" data-remove>Hapus</button>
+          <template><div class="rep-row"><input class="input" name="problem" aria-label="Kendala">{{ template "rm" }}</div></template>
+          <button type="button" class="add" data-add><svg class="ic"><use href="#i-plus"/></svg>Tambah kendala</button>
         </div>
-      </template>
-      <button type="button" class="btn btn-ghost" data-add>Tambah statistik</button>
-    </div>
-  </fieldset>
-
-  <fieldset>
-    <legend>Masalah</legend>
-    <div class="repeater" data-repeater data-max="8">
-      <div class="repeater-rows">
-        {{ range .Product.Landing.Problems }}
-        <div class="repeater-row">
-          <div class="fields"><label>Butir <input name="problem" value="{{ . }}"></label></div>
-          <button type="button" class="btn btn-ghost" data-remove>Hapus</button>
-        </div>
-        {{ end }}
       </div>
-      <template>
-        <div class="repeater-row">
-          <div class="fields"><label>Butir <input name="problem"></label></div>
-          <button type="button" class="btn btn-ghost" data-remove>Hapus</button>
-        </div>
-      </template>
-      <button type="button" class="btn btn-ghost" data-add>Tambah masalah</button>
-    </div>
-    <label>Kalimat penutup
-      <input name="problem_close" value="{{ .Product.Landing.ProblemClose }}">
-    </label>
-  </fieldset>
-
-  <fieldset>
-    <legend>Isi paket</legend>
-    <div class="repeater" data-repeater data-max="8">
-      <div class="repeater-rows">
-        {{ range .Product.Landing.Includes }}
-        <div class="repeater-row">
-          <div class="fields"><label>Butir <input name="include" value="{{ . }}"></label></div>
-          <button type="button" class="btn btn-ghost" data-remove>Hapus</button>
-        </div>
-        {{ end }}
-      </div>
-      <template>
-        <div class="repeater-row">
-          <div class="fields"><label>Butir <input name="include"></label></div>
-          <button type="button" class="btn btn-ghost" data-remove>Hapus</button>
-        </div>
-      </template>
-      <button type="button" class="btn btn-ghost" data-add>Tambah isi</button>
-    </div>
-    <label>Catatan
-      <input name="include_note" value="{{ .Product.Landing.IncludeNote }}">
-    </label>
-  </fieldset>
-
-  <fieldset>
-    <legend>Manfaat</legend>
-    <div class="repeater" data-repeater data-max="8">
-      <div class="repeater-rows">
-        {{ range .Product.Landing.Benefits }}
-        <div class="repeater-row">
-          <div class="fields"><label>Butir <input name="benefit" value="{{ . }}"></label></div>
-          <button type="button" class="btn btn-ghost" data-remove>Hapus</button>
-        </div>
-        {{ end }}
-      </div>
-      <template>
-        <div class="repeater-row">
-          <div class="fields"><label>Butir <input name="benefit"></label></div>
-          <button type="button" class="btn btn-ghost" data-remove>Hapus</button>
-        </div>
-      </template>
-      <button type="button" class="btn btn-ghost" data-add>Tambah manfaat</button>
-    </div>
-  </fieldset>
-
-  <fieldset>
-    <legend>Bonus</legend>
-    <div class="repeater" data-repeater data-max="8">
-      <div class="repeater-rows">
-        {{ range .Product.Landing.Bonuses }}
-        <div class="repeater-row">
-          <div class="fields cols-2">
-            <label>Nama <input name="bonus_name" value="{{ .Name }}"></label>
-            <label>Nilai <input name="bonus_value" value="{{ .Value }}"></label>
+      <div class="field"><label for="problem_close">Kalimat penutup</label><input class="input" id="problem_close" name="problem_close" value="{{ .Product.Landing.ProblemClose }}"></div>
+      <div class="field">
+        <span class="label">Isi paket</span>
+        <div class="rep" data-repeater data-max="8">
+          <div class="rep-rows">
+            {{ range .Product.Landing.Includes }}<div class="rep-row"><input class="input" name="include" aria-label="Isi paket" value="{{ . }}">{{ template "rm" }}</div>{{ end }}
           </div>
-          <button type="button" class="btn btn-ghost" data-remove>Hapus</button>
+          <template><div class="rep-row"><input class="input" name="include" aria-label="Isi paket">{{ template "rm" }}</div></template>
+          <button type="button" class="add" data-add><svg class="ic"><use href="#i-plus"/></svg>Tambah isi</button>
         </div>
-        {{ end }}
       </div>
-      <template>
-        <div class="repeater-row">
-          <div class="fields cols-2">
-            <label>Nama <input name="bonus_name"></label>
-            <label>Nilai <input name="bonus_value"></label>
+      <div class="field"><label for="include_note">Catatan isi paket</label><input class="input" id="include_note" name="include_note" value="{{ .Product.Landing.IncludeNote }}"></div>
+      <div class="field">
+        <span class="label">Manfaat</span>
+        <div class="rep" data-repeater data-max="8">
+          <div class="rep-rows">
+            {{ range .Product.Landing.Benefits }}<div class="rep-row"><input class="input" name="benefit" aria-label="Manfaat" value="{{ . }}">{{ template "rm" }}</div>{{ end }}
           </div>
-          <button type="button" class="btn btn-ghost" data-remove>Hapus</button>
+          <template><div class="rep-row"><input class="input" name="benefit" aria-label="Manfaat">{{ template "rm" }}</div></template>
+          <button type="button" class="add" data-add><svg class="ic"><use href="#i-plus"/></svg>Tambah manfaat</button>
         </div>
-      </template>
-      <button type="button" class="btn btn-ghost" data-add>Tambah bonus</button>
-    </div>
-  </fieldset>
+      </div>
+    </section>
 
-  <fieldset>
-    <legend>Testimoni</legend>
-    <div class="repeater" data-repeater data-max="8">
-      <div class="repeater-rows">
-        {{ range .Product.Landing.Testimonials }}
-        <div class="repeater-row">
-          <div class="fields">
-            <label>Kutipan <textarea name="testi_quote">{{ .Quote }}</textarea></label>
-            <div class="row-2">
-              <label>Nama <input name="testi_author" value="{{ .Author }}"></label>
-              <label>Bintang
-                <select name="testi_stars">
-                  <option value="5"{{ if eq .Stars 5 }} selected{{ end }}>5</option>
-                  <option value="4"{{ if eq .Stars 4 }} selected{{ end }}>4</option>
-                  <option value="3"{{ if eq .Stars 3 }} selected{{ end }}>3</option>
-                  <option value="2"{{ if eq .Stars 2 }} selected{{ end }}>2</option>
-                  <option value="1"{{ if eq .Stars 1 }} selected{{ end }}>1</option>
-                </select>
-              </label>
+    <section class="fs" id="f-bukti">
+      <header><h2>Bonus &amp; testimoni</h2><p>Bagian yang kosong tidak tampil di halaman produk.</p></header>
+      <div class="field">
+        <span class="label">Bonus</span>
+        <div class="rep pair" data-repeater data-max="8">
+          <div class="rep-head"><span>Nilai</span><span>Nama bonus</span><span></span></div>
+          <div class="rep-rows">
+            {{ range .Product.Landing.Bonuses }}<div class="rep-row"><input class="input" name="bonus_value" aria-label="Nilai" value="{{ .Value }}"><input class="input" name="bonus_name" aria-label="Nama bonus" value="{{ .Name }}">{{ template "rm" }}</div>{{ end }}
+          </div>
+          <template><div class="rep-row"><input class="input" name="bonus_value" aria-label="Nilai"><input class="input" name="bonus_name" aria-label="Nama bonus">{{ template "rm" }}</div></template>
+          <button type="button" class="add" data-add><svg class="ic"><use href="#i-plus"/></svg>Tambah bonus</button>
+        </div>
+      </div>
+      <div class="field">
+        <span class="label">Testimoni</span>
+        <div class="rep block" data-repeater data-max="8">
+          <div class="rep-rows">
+            {{ range .Product.Landing.Testimonials }}
+            <div class="rep-row"><div class="rep-block">
+              <div class="field"><label>Kutipan <textarea class="input" name="testi_quote">{{ .Quote }}</textarea></label></div>
+              <div class="two">
+                <div class="field"><label>Nama <input class="input" name="testi_author" value="{{ .Author }}"></label></div>
+                <div class="field"><label>Bintang <select class="input" name="testi_stars"><option value="5"{{ if eq .Stars 5 }} selected{{ end }}>5</option><option value="4"{{ if eq .Stars 4 }} selected{{ end }}>4</option><option value="3"{{ if eq .Stars 3 }} selected{{ end }}>3</option><option value="2"{{ if eq .Stars 2 }} selected{{ end }}>2</option><option value="1"{{ if eq .Stars 1 }} selected{{ end }}>1</option></select></label></div>
+              </div>
+            </div>{{ template "rm" }}</div>
+            {{ end }}
+          </div>
+          <template><div class="rep-row"><div class="rep-block">
+            <div class="field"><label>Kutipan <textarea class="input" name="testi_quote"></textarea></label></div>
+            <div class="two">
+              <div class="field"><label>Nama <input class="input" name="testi_author"></label></div>
+              <div class="field"><label>Bintang <select class="input" name="testi_stars"><option value="5" selected>5</option><option value="4">4</option><option value="3">3</option><option value="2">2</option><option value="1">1</option></select></label></div>
             </div>
-          </div>
-          <button type="button" class="btn btn-ghost" data-remove>Hapus</button>
+          </div>{{ template "rm" }}</div></template>
+          <button type="button" class="add" data-add><svg class="ic"><use href="#i-plus"/></svg>Tambah testimoni</button>
         </div>
-        {{ end }}
+        <span class="hint">Pakai testimoni dari pembeli sungguhan saja.</span>
       </div>
-      <template>
-        <div class="repeater-row">
-          <div class="fields">
-            <label>Kutipan <textarea name="testi_quote"></textarea></label>
-            <div class="row-2">
-              <label>Nama <input name="testi_author"></label>
-              <label>Bintang
-                <select name="testi_stars">
-                  <option value="5" selected>5</option>
-                  <option value="4">4</option>
-                  <option value="3">3</option>
-                  <option value="2">2</option>
-                  <option value="1">1</option>
-                </select>
-              </label>
-            </div>
-          </div>
-          <button type="button" class="btn btn-ghost" data-remove>Hapus</button>
-        </div>
-      </template>
-      <button type="button" class="btn btn-ghost" data-add>Tambah testimoni</button>
-    </div>
-  </fieldset>
+    </section>
 
-  <fieldset>
-    <legend>Penawaran</legend>
-    <label>Teks urgensi
-      <input name="urgency_text" value="{{ .Product.Landing.UrgencyText }}">
-    </label>
-    <label>Selesai pada
-      <input name="offer_ends_at" type="datetime-local" value="{{ .OfferEnds }}">
-    </label>
-    <div class="repeater" data-repeater data-max="8">
-      <div class="repeater-rows">
-        {{ range .Product.Landing.Checklist }}
-        <div class="repeater-row">
-          <div class="fields"><label>Butir <input name="checklist" value="{{ . }}"></label></div>
-          <button type="button" class="btn btn-ghost" data-remove>Hapus</button>
-        </div>
-        {{ end }}
+    <section class="fs" id="f-tawar">
+      <header><h2>Penawaran</h2><p>Kotak harga di samping halaman produk.</p></header>
+      <div class="two">
+        <div class="field"><label for="urgency_text">Teks di atas harga <span class="opt">(opsional)</span></label><input class="input" id="urgency_text" name="urgency_text" value="{{ .Product.Landing.UrgencyText }}"></div>
+        <div class="field"><label for="offer_ends_at">Harga perkenalan berakhir</label><input class="input" id="offer_ends_at" name="offer_ends_at" type="datetime-local" value="{{ .OfferEnds }}"><span class="hint">Kosongkan jika tidak ada batas waktu.</span></div>
       </div>
-      <template>
-        <div class="repeater-row">
-          <div class="fields"><label>Butir <input name="checklist"></label></div>
-          <button type="button" class="btn btn-ghost" data-remove>Hapus</button>
-        </div>
-      </template>
-      <button type="button" class="btn btn-ghost" data-add>Tambah checklist</button>
-    </div>
-    <label>Label tombol
-      <input name="cta_label" value="{{ .Product.Landing.CTALabel }}" placeholder="Beli sekarang">
-    </label>
-  </fieldset>
-
-  <fieldset>
-    <legend>FAQ</legend>
-    <div class="repeater" data-repeater data-max="12">
-      <div class="repeater-rows">
-        {{ range .Product.Landing.FAQ }}
-        <div class="repeater-row">
-          <div class="fields">
-            <label>Pertanyaan <input name="faq_q" value="{{ .Question }}"></label>
-            <label>Jawaban <textarea name="faq_a">{{ .Answer }}</textarea></label>
+      <div class="field">
+        <span class="label">Daftar isi di kotak harga</span>
+        <div class="rep" data-repeater data-max="8">
+          <div class="rep-rows">
+            {{ range .Product.Landing.Checklist }}<div class="rep-row"><input class="input" name="checklist" aria-label="Isi kotak harga" value="{{ . }}">{{ template "rm" }}</div>{{ end }}
           </div>
-          <button type="button" class="btn btn-ghost" data-remove>Hapus</button>
+          <template><div class="rep-row"><input class="input" name="checklist" aria-label="Isi kotak harga">{{ template "rm" }}</div></template>
+          <button type="button" class="add" data-add><svg class="ic"><use href="#i-plus"/></svg>Tambah baris</button>
         </div>
-        {{ end }}
       </div>
-      <template>
-        <div class="repeater-row">
-          <div class="fields">
-            <label>Pertanyaan <input name="faq_q"></label>
-            <label>Jawaban <textarea name="faq_a"></textarea></label>
-          </div>
-          <button type="button" class="btn btn-ghost" data-remove>Hapus</button>
+      <div class="field"><label for="cta_label">Teks tombol beli</label><input class="input" id="cta_label" name="cta_label" value="{{ .Product.Landing.CTALabel }}" placeholder="Beli sekarang"></div>
+    </section>
+
+    <section class="fs" id="f-faq">
+      <header><h2>FAQ</h2><p>Pertanyaan yang sering ditanyakan pembeli.</p></header>
+      <div class="rep block" data-repeater data-max="12">
+        <div class="rep-rows">
+          {{ range .Product.Landing.FAQ }}
+          <div class="rep-row"><div class="rep-block">
+            <div class="field"><label>Pertanyaan <input class="input" name="faq_q" value="{{ .Question }}"></label></div>
+            <div class="field"><label>Jawaban <textarea class="input" name="faq_a">{{ .Answer }}</textarea></label></div>
+          </div>{{ template "rm" }}</div>
+          {{ end }}
         </div>
-      </template>
-      <button type="button" class="btn btn-ghost" data-add>Tambah FAQ</button>
+        <template><div class="rep-row"><div class="rep-block">
+          <div class="field"><label>Pertanyaan <input class="input" name="faq_q"></label></div>
+          <div class="field"><label>Jawaban <textarea class="input" name="faq_a"></textarea></label></div>
+        </div>{{ template "rm" }}</div></template>
+        <button type="button" class="add" data-add><svg class="ic"><use href="#i-plus"/></svg>Tambah pertanyaan</button>
+      </div>
+    </section>
+
+    <section class="fs" id="f-seo">
+      <header><h2>SEO</h2><p>Judul dan deskripsi di hasil pencarian Google.</p></header>
+      <div class="field"><label for="meta_title">Judul halaman</label><input class="input" id="meta_title" name="meta_title" value="{{ .Product.Landing.MetaTitle }}"></div>
+      <div class="field"><label for="meta_description">Deskripsi</label><textarea class="input" id="meta_description" name="meta_description" data-count="160" aria-describedby="md-count">{{ .Product.Landing.MetaDescription }}</textarea><span class="hint num" id="md-count"></span></div>
+    </section>
+
+    <div class="savebar">
+      <div class="st">
+        <div class="seg" role="radiogroup" aria-label="Status">
+          <label><input type="radio" name="status" value="draft"{{ if ne .Product.Status "published" }} checked{{ end }}><span>Draf</span></label>
+          <label><input type="radio" name="status" value="published"{{ if eq .Product.Status "published" }} checked{{ end }}><span>Tayang</span></label>
+        </div>
+        <span data-dirty-label>{{ if .IsNew }}Belum disimpan{{ else }}Semua tersimpan{{ end }}</span>
+      </div>
+      <button class="btn" type="submit">{{ if .IsNew }}Buat produk{{ else }}Simpan perubahan{{ end }}</button>
     </div>
-  </fieldset>
+  </form>
 
-  <button class="btn" type="submit">Simpan</button>
-</form>
-
-{{ if not .IsNew }}
-<form method="post" action="/admin/products/{{ .Product.ID }}/delete" data-confirm="Hapus produk ini?" class="danger-form">
-  <input type="hidden" name="csrf" value="{{ .CSRF }}">
-  <button class="btn btn-danger" type="submit">Hapus produk</button>
-</form>
-{{ end }}
+  {{ if not .IsNew }}
+  <section class="fs danger">
+    <div class="row">
+      <div><h2>Hapus produk</h2><p>Halaman produk berhenti tayang. Pesanan lama tetap tersimpan.</p></div>
+      <button type="button" class="btn btn-quiet" style="color:var(--bad)" data-ask-delete>Hapus produk…</button>
+    </div>
+    <form method="post" action="/admin/products/{{ .Product.ID }}/delete" class="confirm" data-delete hidden>
+      <input type="hidden" name="csrf" value="{{ .CSRF }}">
+      <span>Yakin hapus “{{ .Product.Name }}”?</span>
+      <button class="btn btn-danger btn-sm" type="submit">Ya, hapus</button>
+      <button class="link" type="button" data-cancel-delete>Batal</button>
+    </form>
+  </section>
+  {{ end }}
+  </div>
+</div>
 <script src="/static/js/admin.js" defer></script>
 {{ template "admin-bottom" . }}
 {{ end }}

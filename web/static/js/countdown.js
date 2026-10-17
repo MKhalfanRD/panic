@@ -3,21 +3,23 @@
   if (!root) return;
   var end = Date.parse(root.getAttribute("data-offer-ends"));
   if (Number.isNaN(end)) return;
-  var units = {
-    days: root.querySelector("[data-unit=days]"),
-    hours: root.querySelector("[data-unit=hours]"),
-    minutes: root.querySelector("[data-unit=minutes]"),
-    seconds: root.querySelector("[data-unit=seconds]")
-  };
-  function pad(n) { return String(n).padStart(2, "0"); }
+  var left = root.querySelector("[data-left]");
+  var label = root.querySelector("[data-label]");
   function tick() {
-    var diff = Math.max(0, end - Date.now());
-    units.days.textContent = pad(Math.floor(diff / 86400000));
-    units.hours.textContent = pad(Math.floor((diff % 86400000) / 3600000));
-    units.minutes.textContent = pad(Math.floor((diff % 3600000) / 60000));
-    units.seconds.textContent = pad(Math.floor((diff % 60000) / 1000));
-    if (diff === 0) root.setAttribute("data-done", "true");
+    var diff = end - Date.now();
+    if (diff <= 0) {
+      label.textContent = "Harga perkenalan sudah berakhir";
+      left.textContent = "";
+      root.setAttribute("data-done", "true");
+      return false;
+    }
+    var d = Math.floor(diff / 86400000);
+    var h = Math.floor((diff % 86400000) / 3600000);
+    var m = Math.floor((diff % 3600000) / 60000);
+    left.textContent = d > 0 ? d + " hari " + h + " jam" : h > 0 ? h + " jam " + m + " menit" : Math.max(m, 1) + " menit";
+    return true;
   }
-  tick();
-  setInterval(tick, 1000);
+  if (tick()) {
+    var timer = setInterval(function () { if (!tick()) clearInterval(timer); }, 30000);
+  }
 })();

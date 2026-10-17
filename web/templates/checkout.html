@@ -1,76 +1,139 @@
 {{ define "page-checkout" }}
 {{ template "head" . }}
-<main class="wrap">
-  <section class="section">
-    <p class="eyebrow"><a href="/{{ .StoreSlug }}/{{ .ProductSlug }}">Kembali ke penawaran</a></p>
-    <h1>Checkout</h1>
-    <p class="lead">{{ .ProductName }}</p>
-    <p class="price"><strong>{{ formatIDR .Price }}</strong></p>
-    {{ if .Error }}<p class="banner banner-error" role="alert">{{ .Error }}</p>{{ end }}
-    <form method="post" action="/{{ .StoreSlug }}/{{ .ProductSlug }}/checkout" class="stack">
-      <input type="hidden" name="csrf" value="{{ .CSRF }}">
-      <label>Nama
-        <input name="name" required autocomplete="name" value="{{ .Name }}">
-      </label>
-      <label>Email
-        <input name="email" type="email" required autocomplete="email" value="{{ .Email }}">
-      </label>
-      <label>Telepon
-        <input name="phone" type="tel" required autocomplete="tel" inputmode="tel" value="{{ .Phone }}" placeholder="08…">
-      </label>
-      <button class="btn btn-block" type="submit">Lanjut bayar</button>
-    </form>
-  </section>
+<header class="site-head"><div class="wrap"><a class="logo" href="/">Panic</a><span class="crumbs"><svg class="ic ic-sm"><use href="#i-lock"/></svg>Checkout aman</span></div></header>
+<main class="wrap" id="main">
+  <div class="co">
+    <aside class="receipt" aria-label="Ringkasan pesanan">
+      <div class="r-head"><span>Ringkasan</span>{{ if .StoreName }}<span>{{ .StoreName }}</span>{{ end }}</div>
+      <hr>
+      {{ if gt .OriginalPrice .Price }}
+      <div class="line"><b>{{ .ProductName }}</b><span>{{ formatIDR .OriginalPrice }}</span></div>
+      <div class="line save"><span>Harga perkenalan</span><span>−{{ formatIDR (sub .OriginalPrice .Price) }}</span></div>
+      {{ else }}
+      <div class="line"><b>{{ .ProductName }}</b><span>{{ formatIDR .Price }}</span></div>
+      {{ end }}
+      <hr>
+      <div class="total"><span>Total bayar</span><strong>{{ formatIDR .Price }}</strong></div>
+      <p class="fine">Biaya tambahan dari metode bayar tertentu, jika ada, ditampilkan oleh Midtrans.</p>
+    </aside>
+    <div>
+      <a class="back" href="/{{ .StoreSlug }}/{{ .ProductSlug }}"><svg class="ic"><use href="#i-back"/></svg>Kembali ke penawaran</a>
+      <h1>Data pembeli</h1>
+      <ol class="steps" aria-label="Langkah pembelian">
+        <li class="on" aria-current="step"><b>1</b>Data pembeli</li><li><b>2</b>Bayar</li><li><b>3</b>Terima berkas</li>
+      </ol>
+      <form method="post" action="/{{ .StoreSlug }}/{{ .ProductSlug }}/checkout" class="form" data-busy="Membuat pesanan…">
+        <input type="hidden" name="csrf" value="{{ .CSRF }}">
+        {{ if .Error }}<p class="banner banner-error" role="alert">{{ .Error }}</p>{{ end }}
+        <div class="field">
+          <label for="co-name">Nama lengkap</label>
+          <input class="input" id="co-name" name="name" required minlength="2" maxlength="100" autocomplete="name" value="{{ .Name }}">
+        </div>
+        <div class="field">
+          <label for="co-email">Email</label>
+          <input class="input" id="co-email" name="email" type="email" required autocomplete="email" spellcheck="false" value="{{ .Email }}" placeholder="nama@email.com…" aria-describedby="co-email-h">
+          <span class="hint" id="co-email-h">Berkas dikirim ke email ini. Periksa ejaannya.</span>
+        </div>
+        <div class="field">
+          <label for="co-phone">Nomor telepon</label>
+          <input class="input" id="co-phone" name="phone" type="tel" required autocomplete="tel" inputmode="tel" value="{{ .Phone }}" placeholder="0812…" aria-describedby="co-phone-h">
+          <span class="hint" id="co-phone-h">Dikirim ke Midtrans sebagai data pembeli.</span>
+        </div>
+        <button class="btn btn-lg btn-block" type="submit">Lanjut ke pembayaran · {{ formatIDR .Price }}</button>
+        <p class="trust"><svg class="ic ic-sm"><use href="#i-lock"/></svg>Metode bayar dipilih di langkah berikutnya.</p>
+      </form>
+    </div>
+  </div>
 </main>
+<script src="/static/js/ui.js" defer></script>
 {{ template "foot" . }}
 {{ end }}
 
 {{ define "page-payment" }}
 {{ template "head" . }}
-<main class="wrap">
-  <section class="section">
-    <h1>{{ .StatusLabel }}</h1>
-    <p class="lead">{{ .ProductName }}</p>
-    <dl class="meta">
-      <div><dt>Invoice</dt><dd>{{ .Invoice }}</dd></div>
-      <div><dt>Email</dt><dd>{{ .Email }}</dd></div>
-      <div><dt>Total</dt><dd>{{ formatIDR .Amount }}</dd></div>
-      <div><dt>Status</dt><dd><span class="pill" data-status="{{ .Status }}">{{ .StatusLabel }}</span></dd></div>
-    </dl>
-    {{ if .Note }}<p class="note">{{ .Note }}</p>{{ end }}
+<header class="site-head"><div class="wrap"><a class="logo" href="/">Panic</a><span class="crumbs">Status pesanan</span></div></header>
+<main class="wrap" id="main">
+  {{ $k := statusKind .Status }}
+  <div class="pay">
+    <div>
+      <span class="chip k-{{ $k }}">{{ .StatusLabel }}</span>
+      {{ if eq $k "pending" }}
+      <h1>Selesaikan pembayaran Anda</h1>
+      <p class="lead">Pesanan sudah tercatat. Simpan link halaman ini untuk mengecek status kapan saja.</p>
+      {{ else if eq $k "paid" }}
+      <h1>Pembayaran diterima</h1>
+      <p class="lead">Terima kasih. Penjual akan mengirim berkas ke email Anda.</p>
+      {{ else }}
+      <h1>Pesanan ini tidak bisa dibayar lagi</h1>
+      <p class="lead">Status: {{ .StatusLabel }}. Buat pesanan baru dari halaman produk jika masih ingin membeli.</p>
+      {{ end }}
+    </div>
+
+    <div class="receipt">
+      <div class="r-head"><span>Invoice</span><span class="copy"><span class="mono" id="invoice">{{ .Invoice }}</span><button type="button" data-copy="invoice">Salin</button></span></div>
+      <hr>
+      <div class="line"><span>Produk</span><span>{{ .ProductName }}</span></div>
+      <div class="line"><span>Email</span><span>{{ .Email }}</span></div>
+      {{ if .CreatedAt }}<div class="line"><span>Dibuat</span><span>{{ .CreatedAt }}</span></div>{{ end }}
+      <hr>
+      <div class="total"><span>Total</span><strong>{{ formatIDR .Amount }}</strong></div>
+    </div>
+
+    {{ if .Note }}<p class="note"><svg class="ic"><use href="#i-info"/></svg><span>{{ .Note }}</span></p>{{ end }}
     {{ if .HasSnap }}
-    <button type="button" class="btn" id="pay-btn" data-token="{{ .Token }}">Bayar sekarang</button>
+    <button type="button" class="btn btn-lg btn-block" id="pay-btn" data-token="{{ .Token }}">Bayar sekarang · {{ formatIDR .Amount }}</button>
     <script src="{{ .SnapJS }}" data-client-key="{{ .ClientKey }}"></script>
     <script src="/static/js/payment.js" defer></script>
     {{ else if .RedirectURL }}
-    <a class="btn" href="{{ .RedirectURL }}">Lanjut bayar</a>
-    {{ else if .Pending }}
-    <p class="fine">Tombol bayar muncul setelah Midtrans siap.</p>
+    <a class="btn btn-lg btn-block" href="{{ .RedirectURL }}">Bayar sekarang · {{ formatIDR .Amount }}</a>
     {{ end }}
-  </section>
+
+    <ol class="timeline" aria-label="Perjalanan pesanan">
+      <li class="done"><span class="dot"><svg class="ic"><use href="#i-check"/></svg></span><div><b>Pesanan dibuat</b><span>{{ .CreatedAt }}</span></div></li>
+      {{ if eq $k "paid" }}
+      <li class="done"><span class="dot"><svg class="ic"><use href="#i-check"/></svg></span><div><b>Pembayaran</b><span>Lunas{{ if .PaidAt }}, {{ .PaidAt }}{{ end }}</span></div></li>
+      <li class="now"><span class="dot"></span><div><b>Berkas dikirim</b><span>Penjual mengirim ke {{ .Email }}</span></div></li>
+      {{ else if eq $k "pending" }}
+      <li class="now"><span class="dot"></span><div><b>Pembayaran</b><span>Menunggu konfirmasi dari Midtrans</span></div></li>
+      <li><span class="dot"></span><div><b>Berkas dikirim</b><span>Penjual mengirim ke {{ .Email }} setelah lunas</span></div></li>
+      {{ else }}
+      <li><span class="dot"></span><div><b>Pembayaran</b><span>{{ .StatusLabel }}</span></div></li>
+      {{ end }}
+    </ol>
+
+    {{ if .StoreSlug }}<p><a href="/{{ .StoreSlug }}">Kembali ke toko {{ .StoreName }}</a></p>{{ end }}
+  </div>
 </main>
+<script src="/static/js/ui.js" defer></script>
 {{ template "foot" . }}
 {{ end }}
 
 {{ define "page-login" }}
 {{ template "head" . }}
-<main class="wrap">
-  <section class="section">
-    <h1>Masuk</h1>
-    {{ if .Error }}<p class="banner banner-error" role="alert">{{ .Error }}</p>{{ end }}
-    {{ if .DevHint }}<p class="note">Akun contoh: admin@panic.test dan seller@panic.test. Kata sandi dari SEED_PASSWORD.</p>{{ end }}
-    <form method="post" action="/login" class="stack">
+<main class="center" id="main">
+  <div class="login">
+    <a class="logo" href="/">Panic <small>Penjual</small></a>
+    <form method="post" action="/login" class="card" data-busy="Masuk…">
+      <h1 style="font-size:24px">Masuk ke dasbor</h1>
+      {{ if .Error }}<p class="banner banner-error" role="alert">{{ .Error }}</p>{{ end }}
+      {{ if .DevHint }}<p class="devhint">Mode pengembangan: akun contoh admin@panic.test dan seller@panic.test. Kata sandi dari SEED_PASSWORD.</p>{{ end }}
       <input type="hidden" name="csrf" value="{{ .CSRF }}">
       <input type="hidden" name="next" value="{{ .Next }}">
-      <label>Email
-        <input name="email" type="email" required autocomplete="username">
-      </label>
-      <label>Kata sandi
-        <input name="password" type="password" required autocomplete="current-password">
-      </label>
-      <button class="btn btn-block" type="submit">Masuk</button>
+      <div class="field">
+        <label for="lg-email">Email</label>
+        <input class="input" id="lg-email" name="email" type="email" required autocomplete="username" spellcheck="false">
+      </div>
+      <div class="field">
+        <label for="lg-pw">Kata sandi</label>
+        <div class="pw">
+          <input class="input" id="lg-pw" name="password" type="password" required autocomplete="current-password">
+          <button type="button" class="link" data-reveal="lg-pw" aria-controls="lg-pw">Tampilkan</button>
+        </div>
+      </div>
+      <button class="btn btn-block btn-lg" type="submit">Masuk</button>
     </form>
-  </section>
+  </div>
 </main>
+<script src="/static/js/ui.js" defer></script>
 {{ template "foot" . }}
 {{ end }}

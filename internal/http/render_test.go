@@ -2,6 +2,7 @@ package http
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 	"time"
 
@@ -68,5 +69,29 @@ func TestTemplatesExecute(t *testing.T) {
 		if buf.Len() == 0 {
 			t.Errorf("%s empty", name)
 		}
+	}
+}
+
+func TestStatusKindAndPaidPayment(t *testing.T) {
+	cases := map[string]string{
+		domain.StatusPending: "pending", domain.StatusSettlement: "paid", domain.StatusPaid: "paid",
+		domain.StatusExpire: "closed", domain.StatusCancel: "closed", domain.StatusDeny: "closed",
+	}
+	for status, want := range cases {
+		if got := statusKind(status); got != want {
+			t.Errorf("statusKind(%q) = %q, want %q", status, got, want)
+		}
+	}
+	tmpl, err := ParseTemplates()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var buf bytes.Buffer
+	page := paymentView{view: view{Title: "Bayar"}, Invoice: "PNX-1", Amount: 1000, Status: domain.StatusPaid, StatusLabel: "Lunas", PaidAt: "17 Okt 2026, 17.34", StoreSlug: "toko", StoreName: "Toko"}
+	if err := tmpl.ExecuteTemplate(&buf, "page-payment", page); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(buf.String(), "Pembayaran diterima") {
+		t.Error("paid page should say the payment was received")
 	}
 }

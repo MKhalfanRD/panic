@@ -100,9 +100,12 @@ func FormatIDR(amount int64) string {
 	return b.String()
 }
 
+var monthsID = [...]string{"Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"}
+
+// FormatJakarta renders a time the way Indonesian readers write it: "17 Okt 2026, 17.29".
 func FormatJakarta(t time.Time) string {
-	loc := jakarta()
-	return t.In(loc).Format("02 Jan 2006 15:04")
+	t = t.In(jakarta())
+	return fmt.Sprintf("%d %s %d, %02d.%02d", t.Day(), monthsID[t.Month()-1], t.Year(), t.Hour(), t.Minute())
 }
 
 func FormatOfferInput(t *time.Time) string {
